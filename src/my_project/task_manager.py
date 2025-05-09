@@ -120,7 +120,7 @@ class MyAgentTaskManager(InMemoryTaskManager):
         state=TaskState.INPUT_REQUIRED,
         message=ask_message
       ),
-      final=True,
+      final=False,
     )
     await self.enqueue_events_for_sse(
     request.params.id,
@@ -162,8 +162,9 @@ class MyAgentTaskManager(InMemoryTaskManager):
     else:
       asyncio.create_task(self._stream_3_messages(request))
 
-    return self.dequeue_events_for_sse(
+    async for event in self.dequeue_events_for_sse(
       request_id=request.id,
       task_id=task_id,
       sse_event_queue=sse_event_queue,
-    )
+    ):
+      yield event
